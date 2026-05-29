@@ -4,10 +4,21 @@ import com.library.entity.UserInfo;
 import com.library.util.DBUtil;
 
 import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
 public class UserDAO {
+
+    // 时区转换工具方法：修复时间显示问题
+    private LocalDateTime convertToBeijingTime(Timestamp timestamp) {
+        if (timestamp == null) {
+            return null;
+        }
+        // 直接返回时间戳对应的本地时间
+        return timestamp.toLocalDateTime();
+    }
 
     public UserInfo login(String username, String password) {
         String sql = "SELECT * FROM user_info WHERE username = ? AND password = ? AND status = 1";
@@ -26,7 +37,7 @@ public class UserDAO {
                     user.setPassword(rs.getString("password"));
                     user.setRole(rs.getString("role"));
                     user.setStatus(rs.getInt("status"));
-                    user.setCreateTime(rs.getTimestamp("create_time").toLocalDateTime());
+                    user.setCreateTime(convertToBeijingTime(rs.getTimestamp("create_time")));
                     return user;
                 }
             }
@@ -69,7 +80,7 @@ public class UserDAO {
                     user.setPassword(rs.getString("password"));
                     user.setRole(rs.getString("role"));
                     user.setStatus(rs.getInt("status"));
-                    user.setCreateTime(rs.getTimestamp("create_time").toLocalDateTime());
+                    user.setCreateTime(convertToBeijingTime(rs.getTimestamp("create_time")));
                     return user;
                 }
             }
@@ -94,7 +105,7 @@ public class UserDAO {
                 user.setUsername(rs.getString("username"));
                 user.setRole(rs.getString("role"));
                 user.setStatus(rs.getInt("status"));
-                user.setCreateTime(rs.getTimestamp("create_time").toLocalDateTime());
+                user.setCreateTime(convertToBeijingTime(rs.getTimestamp("create_time")));
                 users.add(user);
             }
         } catch (SQLException e) {

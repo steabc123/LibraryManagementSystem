@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @WebServlet("/api/users/*")
@@ -34,6 +35,17 @@ public class UserServlet extends HttpServlet {
         }
 
         String pathInfo = req.getPathInfo();
+        
+        // 获取所有用户列表
+        if ("/all".equals(pathInfo)) {
+            List<UserInfo> users = userDAO.getAllUsers();
+            // 移除密码信息
+            users.forEach(user -> user.setPassword(null));
+            resp.getWriter().write(gson.toJson(Result.success(users)));
+            return;
+        }
+        
+        // 获取指定ID的用户
         if (pathInfo != null && !pathInfo.equals("/")) {
             try {
                 int id = Integer.parseInt(pathInfo.substring(1));
@@ -47,15 +59,17 @@ public class UserServlet extends HttpServlet {
             } catch (NumberFormatException e) {
                 resp.getWriter().write(gson.toJson(Result.error("无效的用户ID")));
             }
-        } else {
-            UserInfo currentUser = (UserInfo) session.getAttribute("currentUser");
-            if (currentUser == null) {
-                resp.getWriter().write(gson.toJson(Result.error(401, "未登录")));
-                return;
-            }
-            currentUser.setPassword(null);
-            resp.getWriter().write(gson.toJson(Result.success(currentUser)));
+            return;
         }
+        
+        // 获取当前登录用户信息
+        UserInfo currentUser = (UserInfo) session.getAttribute("currentUser");
+        if (currentUser == null) {
+            resp.getWriter().write(gson.toJson(Result.error(401, "未登录")));
+            return;
+        }
+        currentUser.setPassword(null);
+        resp.getWriter().write(gson.toJson(Result.success(currentUser)));
     }
 
     @Override

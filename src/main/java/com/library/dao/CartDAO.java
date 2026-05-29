@@ -4,10 +4,21 @@ import com.library.entity.CartItem;
 import com.library.util.DBUtil;
 
 import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CartDAO {
+
+    // 时区转换工具方法：修复时间显示问题
+    private LocalDateTime convertToBeijingTime(Timestamp timestamp) {
+        if (timestamp == null) {
+            return null;
+        }
+        // 直接返回时间戳对应的本地时间
+        return timestamp.toLocalDateTime();
+    }
 
     // 添加商品到购物车
     public boolean addToCart(Integer userId, Integer bookId, String bookName, String author, Double price, Integer quantity) {
@@ -73,7 +84,7 @@ public class CartDAO {
                     item.setAuthor(rs.getString("author"));
                     item.setPrice(rs.getBigDecimal("price"));
                     item.setQuantity(rs.getInt("quantity"));
-                    item.setCreateTime(rs.getTimestamp("create_time").toLocalDateTime());
+                    item.setCreateTime(convertToBeijingTime(rs.getTimestamp("create_time")));
                     cartItems.add(item);
                 }
             }
