@@ -91,5 +91,21 @@ public class CategoryServlet extends HttpServlet {
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json;charset=UTF-8");
         resp.setCharacterEncoding("UTF-8");
+
+        String pathInfo = req.getPathInfo();
+        if (pathInfo != null && !pathInfo.equals("/")) {
+            try {
+                int id = Integer.parseInt(pathInfo.substring(1));
+                if (categoryDAO.deleteCategory(id)) {
+                    resp.getWriter().write(gson.toJson(Result.success()));
+                } else {
+                    resp.getWriter().write(gson.toJson(Result.error("删除分类失败")));
+                }
+            } catch (NumberFormatException e) {
+                resp.getWriter().write(gson.toJson(Result.error("无效的分类ID")));
+            }
+        } else {
+            resp.getWriter().write(gson.toJson(Result.error("请提供分类ID")));
+        }
     }
 }

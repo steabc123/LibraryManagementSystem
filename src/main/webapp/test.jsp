@@ -396,6 +396,7 @@
 
         <div class="nav-tabs">
             <button class="nav-tab active" onclick="switchTab('books')">📖 图书管理</button>
+            <button class="nav-tab" onclick="switchTab('cart')">🛒 购物车</button>
             <button class="nav-tab" onclick="switchTab('borrow')">📋 借阅管理</button>
             <button class="nav-tab" onclick="switchTab('users')">👥 用户管理</button>
             <button class="nav-tab" onclick="switchTab('categories')">🏷️ 分类管理</button>
@@ -429,6 +430,41 @@
                     <tbody id="bookTableBody">
                         <tr>
                             <td colspan="8" style="text-align: center;">加载中...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 购物车 -->
+            <div id="cart" class="tab-content">
+                <h2 class="section-title">我的购物车</h2>
+                <div class="stats" id="cartStats" style="display: none;">
+                    <div class="stat-card">
+                        <h3 id="cartTotalAmount">¥0.00</h3>
+                        <p>购物车总金额</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="cartItemCount">0</h3>
+                        <p>商品数量</p>
+                    </div>
+                </div>
+                <button class="btn btn-info" onclick="loadCart()" style="margin-bottom: 20px;">刷新</button>
+                <button class="btn btn-danger" onclick="clearCart()" style="margin-bottom: 20px;">清空购物车</button>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>书名</th>
+                            <th>作者</th>
+                            <th>单价</th>
+                            <th>数量</th>
+                            <th>小计</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cartTableBody">
+                        <tr>
+                            <td colspan="7" style="text-align: center;">请先登录查看</td>
                         </tr>
                     </tbody>
                 </table>
@@ -657,6 +693,8 @@
 
             if (tabName === 'books') {
                 loadBooks();
+            } else if (tabName === 'cart') {
+                loadCart();
             } else if (tabName === 'borrow') {
                 loadMyBorrows();
                 loadAllBorrows();
@@ -899,6 +937,7 @@
                     <td>¥\${book.price ? book.price.toFixed(2) : '0.00'}</td>
                     <td><span class="badge \${book.stock > 0 ? 'badge-success' : 'badge-danger'}">\${book.stock}</span></td>
                     <td class="action-btns">
+                        <button class="btn btn-success" onclick='addToCart(\${JSON.stringify(book)})'>加入购物车</button>
                         <button class="btn btn-primary" onclick='borrowBook(\${book.id})'>借阅</button>
                         <button class="btn btn-warning" onclick='showEditBookModal(\${JSON.stringify(book)})'>编辑</button>
                         <button class="btn btn-danger" onclick="deleteBook(\${book.id})">删除</button>
@@ -1209,6 +1248,140 @@
             const minutes = String(date.getMinutes()).padStart(2, '0');
             const seconds = String(date.getSeconds()).padStart(2, '0');
             return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        }
+
+        // 添加到购物车
+        async function addToCart(book) {
+            if (!currentUser) {
+                showMessage('请先登录', 'error');
+                showLoginModal();
+                return;
+            }
+
+            const result = await apiRequest(contextPath + '/api/cart', 'POST', {
+                action: 'add',
+                bookId: book.id,
+                bookName: book.bookName,
+                author: book.author,
+                price: book.price,
+                quantity: 1
+            });
+
+            if (result && result.code === 200) {
+                showMessage('已加入购物车', 'success');
+            } else {
+                showMessage(result.message || '添加失败', 'error');
+            }
+        }
+
+        // 加载购物车
+        async function loadCart() {
+            if (!currentUser) {
+                document.getElementById('cartTableBody').innerHTML =
+                    '<tr><td colspan="7" style="text-align: center;">请先登录查看</td></tr>';
+                document.getElementById('cartStats').style.display = 'none';
+                return;
+            }
+
+            const result = await apiRequest(contextPath + '/api/cart/list');
+            if (result && result.code === 200) {
+                renderCartTable(result.data);
+                loadCartTotal();
+            } else {
+                showMessage('加载购物车失败', 'error');
+            }
+        }
+
+        // 渲染购物车表格
+        function renderCartTable(cartItems) {
+            const tbody = document.getElementById('cartTableBody');
+            if (!cartItems || cartItems.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">购物车为空</td></tr>';
+                document.getElementById('cartItemCount').textContent = '0';
+                return;
+            }
+
+            document.getElementById('cartItemCount').textContent = cartItems.length;
+
+            tbody.innerHTML = cartItems.map(item => `
+                <tr>
+                    <td>${item.id}</td>
+                    <td>${item.bookName}</td>
+                    <td>${item.author || '-'}</td>
+                    <td>¥${item.price ? item.price.toFixed(2) : '0.00'}</td>
+                    <td>
+                        <input type="number" value="${item.quantity}" min="1" 
+                               onchange="updateCartQuantity(${item.id}, this.value)"
+                               style="width: 80px; padding: 5px;">
+                    </td>
+                    <td>¥${item.totalPrice ? item.totalPrice.toFixed(2) : '0.00'}</td>
+                    <td class="action-btns">
+                        <button class="btn btn-danger" onclick="deleteCartItem(${item.id})">删除</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 加载购物车总金额
+        async function loadCartTotal() {
+            if (!currentUser) return;
+
+            const result = await apiRequest(contextPath + '/api/cart/total');
+            if (result && result.code === 200) {
+                document.getElementById('cartTotalAmount').textContent = 
+                    '¥' + result.data.totalAmount.toFixed(2);
+                document.getElementById('cartStats').style.display = 'grid';
+            }
+        }
+
+        // 更新购物车商品数量
+        async function updateCartQuantity(cartItemId, quantity) {
+            if (!currentUser) return;
+
+            const result = await apiRequest(contextPath + '/api/cart', 'PUT', {
+                cartItemId: cartItemId,
+                quantity: parseInt(quantity)
+            });
+
+            if (result && result.code === 200) {
+                showMessage('更新成功', 'success');
+                loadCart();
+            } else {
+                showMessage(result.message || '更新失败', 'error');
+            }
+        }
+
+        // 删除购物车商品
+        async function deleteCartItem(cartItemId) {
+            if (!confirm('确定要删除这个商品吗？')) {
+                return;
+            }
+
+            const result = await apiRequest(contextPath + '/api/cart/' + cartItemId, 'DELETE');
+            if (result && result.code === 200) {
+                showMessage('删除成功', 'success');
+                loadCart();
+            } else {
+                showMessage(result.message || '删除失败', 'error');
+            }
+        }
+
+        // 清空购物车
+        async function clearCart() {
+            if (!confirm('确定要清空购物车吗？')) {
+                return;
+            }
+
+            const result = await apiRequest(contextPath + '/api/cart', 'POST', {
+                action: 'clear'
+            });
+
+            if (result && result.code === 200) {
+                showMessage('清空成功', 'success');
+                loadCart();
+            } else {
+                showMessage(result.message || '清空失败', 'error');
+            }
         }
     </script>
 </body>

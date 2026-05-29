@@ -39,3 +39,10 @@ INSERT INTO book_info VALUES(3,'操作系统','汤小丹','9787115686572','人�
 INSERT INTO book_info VALUES(4,'计算机组成原理','王万生','978730265476','清华大学出版社',58.0,5,'2026-5-31');
 INSERT INTO book_info VALUES(5,'计算机网络','谢希仁','9787121302954','电子工业出版社',59.8,10,'2026-5-28');
 INSERT INTO book_info VALUES(6,'数据结构题集(C语言版)','严蔚敏','9787302033141','清华大学出版社',16,30,'2026-5-28');
+
+-- 为book_info表添加category_id字段
+ALTER TABLE book_info
+    ADD COLUMN category_id INT DEFAULT 1 COMMENT '分类ID，默认1' AFTER stock;
+
+-- 更新现有数据，设置默认分类为1
+UPDATE book_info SET category_id = 1 WHERE category_id IS NULL;

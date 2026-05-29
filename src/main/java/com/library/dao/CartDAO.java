@@ -1,0 +1,158 @@
+package com.library.dao;
+
+import com.library.entity.CartItem;
+import com.library.util.DBUtil;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class CartDAO {
+
+    // 添加商品到购物车
+    public boolean addToCart(Integer userId, Integer bookId, String bookName, String author, Double price, Integer quantity) {
+        // 先检查是否已存在该商品
+        String checkSql = "SELECT id, quantity FROM cart_item WHERE user_id = ? AND book_id = ?";
+        
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
+            
+            checkStmt.setInt(1, userId);
+            checkStmt.setInt(2, bookId);
+            
+            try (ResultSet rs = checkStmt.executeQuery()) {
+                if (rs.next()) {
+                    // 已存在，更新数量
+                    int existingId = rs.getInt("id");
+                    int existingQuantity = rs.getInt("quantity");
+                    int newQuantity = existingQuantity + quantity;
+                    
+                    String updateSql = "UPDATE cart_item SET quantity = ? WHERE id = ?";
+                    try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
+                        updateStmt.setInt(1, newQuantity);
+                        updateStmt.setInt(2, existingId);
+                        return updateStmt.executeUpdate() > 0;
+                    }
+                } else {
+                    // 不存在，插入新记录
+                    String insertSql = "INSERT INTO cart_item (user_id, book_id, book_name, author, price, quantity) VALUES (?, ?, ?, ?, ?, ?)";
+                    try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
+                        insertStmt.setInt(1, userId);
+                        insertStmt.setInt(2, bookId);
+                        insertStmt.setString(3, bookName);
+                        insertStmt.setString(4, author);
+                        insertStmt.setDouble(5, price);
+                        insertStmt.setInt(6, quantity);
+                        return insertStmt.executeUpdate() > 0;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // 获取用户购物车列表
+    public List<CartItem> getCartByUserId(Integer userId) {
+        List<CartItem> cartItems = new ArrayList<>();
+        String sql = "SELECT * FROM cart_item WHERE user_id = ? ORDER BY create_time DESC";
+        
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, userId);
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    CartItem item = new CartItem();
+                    item.setId(rs.getInt("id"));
+                    item.setUserId(rs.getInt("user_id"));
+                    item.setBookId(rs.getInt("book_id"));
+                    item.setBookName(rs.getString("book_name"));
+                    item.setAuthor(rs.getString("author"));
+                    item.setPrice(rs.getBigDecimal("price"));
+                    item.setQuantity(rs.getInt("quantity"));
+                    item.setCreateTime(rs.getTimestamp("create_time").toLocalDateTime());
+                    cartItems.add(item);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return cartItems;
+    }
+
+    // 更新购物车商品数量
+    public boolean updateCartItemQuantity(Integer cartItemId, Integer quantity) {
+        String sql = "UPDATE cart_item SET quantity = ? WHERE id = ?";
+        
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, quantity);
+            pstmt.setInt(2, cartItemId);
+            
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // 删除购物车商品
+    public boolean deleteCartItem(Integer cartItemId) {
+        String sql = "DELETE FROM cart_item WHERE id = ?";
+        
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, cartItemId);
+            
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // 清空用户购物车
+    public boolean clearCart(Integer userId) {
+        String sql = "DELETE FROM cart_item WHERE user_id = ?";
+        
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, userId);
+            
+            pstmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // 计算购物车总金额
+    public double calculateTotalAmount(Integer userId) {
+        String sql = "SELECT SUM(price * quantity) as total FROM cart_item WHERE user_id = ?";
+        
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, userId);
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    double total = rs.getDouble("total");
+                    return rs.wasNull() ? 0.0 : total;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return 0.0;
+    }
+}

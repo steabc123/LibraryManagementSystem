@@ -11,13 +11,15 @@ public class BookInfo {
     private String publisher;
     private BigDecimal price;
     private Integer stock;
+    private Integer categoryId;      // 分类ID
+    private String categoryName;     // 分类名称（用于显示）
     private LocalDateTime createTime;
 
     public BookInfo() {
     }
 
     public BookInfo(Integer id, String bookName, String author, String isbn, String publisher,
-                    BigDecimal price, Integer stock, LocalDateTime createTime) {
+                    BigDecimal price, Integer stock, Integer categoryId, String categoryName, LocalDateTime createTime) {
         this.id = id;
         this.bookName = bookName;
         this.author = author;
@@ -25,6 +27,8 @@ public class BookInfo {
         this.publisher = publisher;
         this.price = price;
         this.stock = stock;
+        this.categoryId = categoryId;
+        this.categoryName = categoryName;
         this.createTime = createTime;
     }
 
@@ -90,6 +94,22 @@ public class BookInfo {
 
     public void setCreateTime(LocalDateTime createTime) {
         this.createTime = createTime;
+    }
+
+    public Integer getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Integer categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 }
 
