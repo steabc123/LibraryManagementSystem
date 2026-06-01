@@ -4,22 +4,10 @@ import com.library.entity.BorrowRecord;
 import com.library.util.DBUtil;
 
 import java.sql.*;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
 public class BorrowDAO {
-
-    // 时区转换工具方法：修复时间显示问题
-    private LocalDateTime convertToBeijingTime(Timestamp timestamp) {
-        if (timestamp == null) {
-            return null;
-        }
-        // 直接返回时间戳对应的本地时间，不做时区转换
-        // 因为 JDBC 驱动已经通过 serverTimezone=Asia/Shanghai 处理了时区
-        return timestamp.toLocalDateTime();
-    }
 
     public boolean borrowBook(Integer userId, Integer bookId) {
         Connection conn = null;
@@ -149,11 +137,11 @@ public class BorrowDAO {
                     record.setRecordId(rs.getLong("record_id"));
                     record.setUserId(rs.getInt("user_id"));
                     record.setBookId(rs.getInt("book_id"));
-                    record.setBorrowTime(convertToBeijingTime(rs.getTimestamp("borrow_time")));
+                    record.setBorrowTime(DBUtil.convertToBeijingTime(rs.getTimestamp("borrow_time")));
 
                     Timestamp returnTime = rs.getTimestamp("return_time");
                     if (returnTime != null) {
-                        record.setReturnTime(convertToBeijingTime(returnTime));
+                        record.setReturnTime(DBUtil.convertToBeijingTime(returnTime));
                     }
 
                     record.setBorrowStatus(rs.getInt("borrow_status"));
@@ -180,11 +168,11 @@ public class BorrowDAO {
                 record.setRecordId(rs.getLong("record_id"));
                 record.setUserId(rs.getInt("user_id"));
                 record.setBookId(rs.getInt("book_id"));
-                record.setBorrowTime(convertToBeijingTime(rs.getTimestamp("borrow_time")));
+                record.setBorrowTime(DBUtil.convertToBeijingTime(rs.getTimestamp("borrow_time")));
 
                 Timestamp returnTime = rs.getTimestamp("return_time");
                 if (returnTime != null) {
-                    record.setReturnTime(convertToBeijingTime(returnTime));
+                    record.setReturnTime(DBUtil.convertToBeijingTime(returnTime));
                 }
 
                 record.setBorrowStatus(rs.getInt("borrow_status"));
@@ -210,7 +198,7 @@ public class BorrowDAO {
                 record.setRecordId(rs.getLong("record_id"));
                 record.setUserId(rs.getInt("user_id"));
                 record.setBookId(rs.getInt("book_id"));
-                record.setBorrowTime(convertToBeijingTime(rs.getTimestamp("borrow_time")));
+                record.setBorrowTime(DBUtil.convertToBeijingTime(rs.getTimestamp("borrow_time")));
                 record.setBorrowStatus(rs.getInt("borrow_status"));
                 records.add(record);
             }

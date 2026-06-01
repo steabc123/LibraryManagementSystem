@@ -4,6 +4,8 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 public class DBUtil {
     // 创建C3P0连接池实例（使用默认配置）
@@ -38,6 +40,16 @@ public class DBUtil {
      */
     public static ComboPooledDataSource getDataSource() {
         return dataSource;
+    }
+
+    /**
+     * 将Timestamp转换为LocalDateTime（北京时间）
+     */
+    public static LocalDateTime convertToBeijingTime(Timestamp timestamp) {
+        if (timestamp == null) {
+            return null;
+        }
+        return timestamp.toLocalDateTime();
     }
 }
 

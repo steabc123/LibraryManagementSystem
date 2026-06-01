@@ -1,36 +1,29 @@
 package com.library.servlet;
 
-import com.google.gson.Gson;
 import com.library.common.Result;
 import com.library.dao.UserDAO;
 import com.library.entity.UserInfo;
-import com.library.util.GsonConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @WebServlet("/api/users/*")
-public class UserServlet extends HttpServlet {
+public class UserServlet extends BaseServlet {
     private UserDAO userDAO = new UserDAO();
-    private Gson gson = GsonConfig.getGson();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json;charset=UTF-8");
         resp.setCharacterEncoding("UTF-8");
 
-        HttpSession session = req.getSession(false);
-        if (session == null || session.getAttribute("currentUser") == null) {
-            resp.getWriter().write(gson.toJson(Result.error(401, "未登录")));
+        if (!checkLogin(req, resp)) {
             return;
         }
 
@@ -39,9 +32,8 @@ public class UserServlet extends HttpServlet {
         // 获取所有用户列表
         if ("/all".equals(pathInfo)) {
             List<UserInfo> users = userDAO.getAllUsers();
-            // 移除密码信息
             users.forEach(user -> user.setPassword(null));
-            resp.getWriter().write(gson.toJson(Result.success(users)));
+            sendJsonResponse(resp, Result.success(users));
             return;
         }
         
@@ -52,24 +44,24 @@ public class UserServlet extends HttpServlet {
                 UserInfo user = userDAO.getUserById(id);
                 if (user != null) {
                     user.setPassword(null);
-                    resp.getWriter().write(gson.toJson(Result.success(user)));
+                    sendJsonResponse(resp, Result.success(user));
                 } else {
-                    resp.getWriter().write(gson.toJson(Result.error("用户不存在")));
+                    sendJsonResponse(resp, Result.error("用户不存在"));
                 }
             } catch (NumberFormatException e) {
-                resp.getWriter().write(gson.toJson(Result.error("无效的用户ID")));
+                sendJsonResponse(resp, Result.error("无效的用户ID"));
             }
             return;
         }
         
         // 获取当前登录用户信息
-        UserInfo currentUser = (UserInfo) session.getAttribute("currentUser");
+        UserInfo currentUser = getCurrentUser(req);
         if (currentUser == null) {
-            resp.getWriter().write(gson.toJson(Result.error(401, "未登录")));
+            sendJsonResponse(resp, Result.error(401, "未登录"));
             return;
         }
         currentUser.setPassword(null);
-        resp.getWriter().write(gson.toJson(Result.success(currentUser)));
+        sendJsonResponse(resp, Result.success(currentUser));
     }
 
     @Override
@@ -77,14 +69,7 @@ public class UserServlet extends HttpServlet {
         resp.setContentType("application/json;charset=UTF-8");
         resp.setCharacterEncoding("UTF-8");
 
-        BufferedReader reader = req.getReader();
-        StringBuilder sb = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            sb.append(line);
-        }
-
-        Map<String, String> params = gson.fromJson(sb.toString(), Map.class);
+        Map<String, String> params = gson.fromJson(readRequestBody(req), Map.class);
         String action = req.getParameter("action");
 
         if ("login".equals(action)) {
@@ -101,9 +86,9 @@ public class UserServlet extends HttpServlet {
                 data.put("username", user.getUsername());
                 data.put("role", user.getRole());
 
-                resp.getWriter().write(gson.toJson(Result.success(data)));
+                sendJsonResponse(resp, Result.success(data));
             } else {
-                resp.getWriter().write(gson.toJson(Result.error("用户名或密码错误")));
+                sendJsonResponse(resp, Result.error("用户名或密码错误"));
             }
         } else if ("register".equals(action)) {
             String username = params.get("username");
@@ -114,9 +99,9 @@ public class UserServlet extends HttpServlet {
             newUser.setPassword(password);
 
             if (userDAO.register(newUser)) {
-                resp.getWriter().write(gson.toJson(Result.success()));
+                sendJsonResponse(resp, Result.success());
             } else {
-                resp.getWriter().write(gson.toJson(Result.error("注册失败")));
+                sendJsonResponse(resp, Result.error("注册失败"));
             }
         }
     }
@@ -126,25 +111,16 @@ public class UserServlet extends HttpServlet {
         resp.setContentType("application/json;charset=UTF-8");
         resp.setCharacterEncoding("UTF-8");
 
-        HttpSession session = req.getSession(false);
-        if (session == null || session.getAttribute("currentUser") == null) {
-            resp.getWriter().write(gson.toJson(Result.error(401, "未登录")));
+        if (!checkLogin(req, resp)) {
             return;
         }
 
-        BufferedReader reader = req.getReader();
-        StringBuilder sb = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            sb.append(line);
-        }
-
-        UserInfo user = gson.fromJson(sb.toString(), UserInfo.class);
+        UserInfo user = gson.fromJson(readRequestBody(req), UserInfo.class);
 
         if (userDAO.updateUser(user)) {
-            resp.getWriter().write(gson.toJson(Result.success()));
+            sendJsonResponse(resp, Result.success());
         } else {
-            resp.getWriter().write(gson.toJson(Result.error("更新用户失败")));
+            sendJsonResponse(resp, Result.error("更新用户失败"));
         }
     }
 
@@ -153,9 +129,7 @@ public class UserServlet extends HttpServlet {
         resp.setContentType("application/json;charset=UTF-8");
         resp.setCharacterEncoding("UTF-8");
 
-        HttpSession session = req.getSession(false);
-        if (session == null || session.getAttribute("currentUser") == null) {
-            resp.getWriter().write(gson.toJson(Result.error(401, "未登录")));
+        if (!checkLogin(req, resp)) {
             return;
         }
 
@@ -164,15 +138,15 @@ public class UserServlet extends HttpServlet {
             try {
                 int id = Integer.parseInt(pathInfo.substring(1));
                 if (userDAO.deleteUser(id)) {
-                    resp.getWriter().write(gson.toJson(Result.success()));
+                    sendJsonResponse(resp, Result.success());
                 } else {
-                    resp.getWriter().write(gson.toJson(Result.error("删除用户失败")));
+                    sendJsonResponse(resp, Result.error("删除用户失败"));
                 }
             } catch (NumberFormatException e) {
-                resp.getWriter().write(gson.toJson(Result.error("无效的用户ID")));
+                sendJsonResponse(resp, Result.error("无效的用户ID"));
             }
         } else {
-            resp.getWriter().write(gson.toJson(Result.error("请提供用户ID")));
+            sendJsonResponse(resp, Result.error("请提供用户ID"));
         }
     }
 }

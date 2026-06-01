@@ -10,14 +10,6 @@ import java.util.List;
 
 public class OrderDAO {
 
-    // 时区转换工具方法
-    private java.time.LocalDateTime convertToBeijingTime(Timestamp timestamp) {
-        if (timestamp == null) {
-            return null;
-        }
-        return timestamp.toLocalDateTime();
-    }
-
     // 创建订单（事务操作）
     public boolean createOrder(OrderInfo order, List<OrderItem> items) {
         Connection conn = null;
@@ -116,10 +108,10 @@ public class OrderDAO {
                     order.setUsername(rs.getString("username"));
                     order.setTotalAmount(rs.getBigDecimal("total_amount"));
                     order.setOrderStatus(rs.getInt("order_status"));
-                    order.setCreateTime(convertToBeijingTime(rs.getTimestamp("create_time")));
-                    order.setPayTime(convertToBeijingTime(rs.getTimestamp("pay_time")));
-                    order.setShipTime(convertToBeijingTime(rs.getTimestamp("ship_time")));
-                    order.setReceiveTime(convertToBeijingTime(rs.getTimestamp("receive_time")));
+                    order.setCreateTime(DBUtil.convertToBeijingTime(rs.getTimestamp("create_time")));
+                    order.setPayTime(DBUtil.convertToBeijingTime(rs.getTimestamp("pay_time")));
+                    order.setShipTime(DBUtil.convertToBeijingTime(rs.getTimestamp("ship_time")));
+                    order.setReceiveTime(DBUtil.convertToBeijingTime(rs.getTimestamp("receive_time")));
                     
                     // 加载订单项
                     order.setItems(getOrderItems(order.getId()));
@@ -150,10 +142,10 @@ public class OrderDAO {
                     order.setUsername(rs.getString("username"));
                     order.setTotalAmount(rs.getBigDecimal("total_amount"));
                     order.setOrderStatus(rs.getInt("order_status"));
-                    order.setCreateTime(convertToBeijingTime(rs.getTimestamp("create_time")));
-                    order.setPayTime(convertToBeijingTime(rs.getTimestamp("pay_time")));
-                    order.setShipTime(convertToBeijingTime(rs.getTimestamp("ship_time")));
-                    order.setReceiveTime(convertToBeijingTime(rs.getTimestamp("receive_time")));
+                    order.setCreateTime(DBUtil.convertToBeijingTime(rs.getTimestamp("create_time")));
+                    order.setPayTime(DBUtil.convertToBeijingTime(rs.getTimestamp("pay_time")));
+                    order.setShipTime(DBUtil.convertToBeijingTime(rs.getTimestamp("ship_time")));
+                    order.setReceiveTime(DBUtil.convertToBeijingTime(rs.getTimestamp("receive_time")));
                     
                     // 加载订单项
                     order.setItems(getOrderItems(order.getId()));
@@ -185,10 +177,10 @@ public class OrderDAO {
                     order.setUsername(rs.getString("username"));
                     order.setTotalAmount(rs.getBigDecimal("total_amount"));
                     order.setOrderStatus(rs.getInt("order_status"));
-                    order.setCreateTime(convertToBeijingTime(rs.getTimestamp("create_time")));
-                    order.setPayTime(convertToBeijingTime(rs.getTimestamp("pay_time")));
-                    order.setShipTime(convertToBeijingTime(rs.getTimestamp("ship_time")));
-                    order.setReceiveTime(convertToBeijingTime(rs.getTimestamp("receive_time")));
+                    order.setCreateTime(DBUtil.convertToBeijingTime(rs.getTimestamp("create_time")));
+                    order.setPayTime(DBUtil.convertToBeijingTime(rs.getTimestamp("pay_time")));
+                    order.setShipTime(DBUtil.convertToBeijingTime(rs.getTimestamp("ship_time")));
+                    order.setReceiveTime(DBUtil.convertToBeijingTime(rs.getTimestamp("receive_time")));
                     
                     // 加载订单项
                     order.setItems(getOrderItems(order.getId()));

@@ -4,21 +4,10 @@ import com.library.entity.BookInfo;
 import com.library.util.DBUtil;
 
 import java.sql.*;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
 public class BookDAO {
-
-    // 时区转换工具方法：修复时间显示问题
-    private LocalDateTime convertToBeijingTime(Timestamp timestamp) {
-        if (timestamp == null) {
-            return null;
-        }
-        // 直接返回时间戳对应的本地时间
-        return timestamp.toLocalDateTime();
-    }
 
     public List<BookInfo> getAllBooks() {
         List<BookInfo> books = new ArrayList<>();
@@ -39,7 +28,7 @@ public class BookDAO {
                 book.setStock(rs.getInt("stock"));
                 book.setCategoryId(rs.getInt("category_id"));
                 book.setCategoryName(rs.getString("category_name"));
-                book.setCreateTime(convertToBeijingTime(rs.getTimestamp("create_time")));
+                book.setCreateTime(DBUtil.convertToBeijingTime(rs.getTimestamp("create_time")));
                 books.add(book);
             }
         } catch (SQLException e) {
@@ -68,7 +57,7 @@ public class BookDAO {
                     book.setStock(rs.getInt("stock"));
                     book.setCategoryId(rs.getInt("category_id"));
                     book.setCategoryName(rs.getString("category_name"));
-                    book.setCreateTime(convertToBeijingTime(rs.getTimestamp("create_time")));
+                    book.setCreateTime(DBUtil.convertToBeijingTime(rs.getTimestamp("create_time")));
                     return book;
                 }
             }
@@ -160,7 +149,7 @@ public class BookDAO {
                     book.setStock(rs.getInt("stock"));
                     book.setCategoryId(rs.getInt("category_id"));
                     book.setCategoryName(rs.getString("category_name"));
-                    book.setCreateTime(convertToBeijingTime(rs.getTimestamp("create_time")));
+                    book.setCreateTime(DBUtil.convertToBeijingTime(rs.getTimestamp("create_time")));
                     books.add(book);
                 }
             }
