@@ -1,39 +1,43 @@
 package com.library.util;
 
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DBUtil {
-    private static final String URL = "jdbc:mysql://localhost:3307/bookstore?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai";
-    private static final String USERNAME = "root";
-    private static final String PASSWORD = "666";
+    // 创建C3P0连接池实例（使用默认配置）
+    private static ComboPooledDataSource dataSource = new ComboPooledDataSource();
 
-    static {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
+    /**
+     * 从连接池获取数据库连接
+     * @return 数据库连接对象
+     * @throws SQLException SQL异常
+     */
     public static Connection getConnection() throws SQLException {
-        Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-        // 设置连接时区为东八区（北京时间）
-        try (java.sql.Statement stmt = conn.createStatement()) {
-            stmt.execute("SET time_zone = '+8:00'");
-        }
-        return conn;
+        return dataSource.getConnection();
     }
 
+    /**
+     * 关闭数据库连接，将连接归还到连接池
+     * @param conn 数据库连接对象
+     */
     public static void close(Connection conn) {
         if (conn != null) {
             try {
-                conn.close();
+                conn.close(); // 这里不是真正关闭连接，而是归还到连接池
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    /**
+     * 获取数据源对象
+     * @return C3P0数据源对象
+     */
+    public static ComboPooledDataSource getDataSource() {
+        return dataSource;
     }
 }
 

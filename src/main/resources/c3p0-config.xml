@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c3p0-config>
+    <!-- 默认配置 -->
+    <default-config>
+        <!-- 数据库连接参数 -->
+        <property name="jdbcUrl">jdbc:mysql://localhost:3307/bookstore?useUnicode=true&amp;characterEncoding=utf8&amp;useSSL=false&amp;serverTimezone=Asia/Shanghai</property>
+        <property name="driverClass">com.mysql.cj.jdbc.Driver</property>
+        <property name="user">root</property>
+        <property name="password">666</property>
+
+        <!-- 连接池配置 -->
+        <!-- 初始化连接数 -->
+        <property name="initialPoolSize">5</property>
+        <!-- 最小连接数 -->
+        <property name="minPoolSize">5</property>
+        <!-- 最大连接数 -->
+        <property name="maxPoolSize">20</property>
+        <!-- 最大空闲时间（秒），超过此时间的空闲连接将被回收 -->
+        <property name="maxIdleTime">300</property>
+        <!-- 连接超时时间（秒） -->
+        <property name="checkoutTimeout">3000</property>
+        <!-- 当连接池连接耗尽时，一次获取的连接数 -->
+        <property name="acquireIncrement">3</property>
+        <!-- 每60秒检查所有连接池中的空闲连接 -->
+        <property name="idleConnectionTestPeriod">60</property>
+        <!-- 最大语句数量 -->
+        <property name="maxStatements">100</property>
+        <!-- 测试连接的SQL语句 -->
+        <property name="preferredTestQuery">SELECT 1</property>
+    </default-config>
+
+    <!-- 命名配置，可以在代码中通过名称使用特定配置 -->
+    <named-config name="bookstore">
+        <property name="jdbcUrl">jdbc:mysql://localhost:3307/bookstore?useUnicode=true&amp;characterEncoding=utf8&amp;useSSL=false&amp;serverTimezone=Asia/Shanghai</property>
+        <property name="driverClass">com.mysql.cj.jdbc.Driver</property>
+        <property name="user">root</property>
+        <property name="password">666</property>
+
+        <property name="initialPoolSize">10</property>
+        <property name="minPoolSize">10</property>
+        <property name="maxPoolSize">50</property>
+        <property name="maxIdleTime">300</property>
+        <property name="checkoutTimeout">3000</property>
+        <property name="acquireIncrement">5</property>
+        <property name="idleConnectionTestPeriod">60</property>
+        <property name="maxStatements">200</property>
+        <property name="preferredTestQuery">SELECT 1</property>
+    </named-config>
+</c3p0-config>

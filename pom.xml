@@ -35,6 +35,13 @@
       <artifactId>jakarta.servlet-api</artifactId>
       <version>6.0.0</version>
     </dependency>
+    <!--c3p0 -->
+    <dependency>
+      <groupId>com.mchange</groupId>
+      <artifactId>c3p0</artifactId>
+      <version>0.9.5.5</version>
+    </dependency>
+
   </dependencies>
   <build>
     <finalName>LibraryManagementSystem</finalName>
