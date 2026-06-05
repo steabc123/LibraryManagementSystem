@@ -38,10 +38,11 @@ public class BorrowDAO {
                 pstmt.executeUpdate();
             }
 
-            String insertBorrowSql = "INSERT INTO borrow_record (user_id, book_id, borrow_time, borrow_status) VALUES (?, ?, NOW(), 0)";
+            String insertBorrowSql = "INSERT INTO borrow_record (user_id, book_id, borrow_time, borrow_status) VALUES (?, ?, ?, 0)";
             try (PreparedStatement pstmt = conn.prepareStatement(insertBorrowSql)) {
                 pstmt.setInt(1, userId);
                 pstmt.setInt(2, bookId);
+                pstmt.setTimestamp(3, Timestamp.valueOf(java.time.LocalDateTime.now()));
                 pstmt.executeUpdate();
             }
 
@@ -87,9 +88,10 @@ public class BorrowDAO {
                 }
             }
 
-            String updateBorrowSql = "UPDATE borrow_record SET return_time = NOW(), borrow_status = 1 WHERE record_id = ?";
+            String updateBorrowSql = "UPDATE borrow_record SET return_time = ?, borrow_status = 1 WHERE record_id = ?";
             try (PreparedStatement pstmt = conn.prepareStatement(updateBorrowSql)) {
-                pstmt.setLong(1, recordId);
+                pstmt.setTimestamp(1, Timestamp.valueOf(java.time.LocalDateTime.now()));
+                pstmt.setLong(2, recordId);
                 pstmt.executeUpdate();
             }
 

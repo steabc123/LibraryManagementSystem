@@ -16,3 +16,20 @@ SELECT
     NOW() as '当前时间',
     UTC_TIMESTAMP() as 'UTC时间',
     TIMEDIFF(NOW(), UTC_TIMESTAMP()) as '时差';
+
+-- ========================================
+-- 永久修复MySQL时区（重启后仍然有效）
+-- ========================================
+-- 方法1：修改 MySQL 配置文件（my.ini 或 my.cnf）
+-- 在 [mysqld] 部分添加：
+-- default-time-zone = '+8:00'
+-- 然后重启 MySQL 服务
+
+-- 方法2：使用 Docker 运行 MySQL 时，添加环境变量：
+-- docker run -e TZ=Asia/Shanghai ...
+-- 或者在 docker-compose.yml 中：
+-- environment:
+--   - TZ=Asia/Shanghai
+
+-- 验证永久配置是否生效（重启MySQL后执行）
+SELECT @@global.time_zone, @@session.time_zone, NOW(), UTC_TIMESTAMP();
