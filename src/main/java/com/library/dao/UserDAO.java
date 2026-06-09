@@ -53,6 +53,24 @@ public class UserDAO {
         }
     }
 
+    public boolean addUser(UserInfo user) {
+        String sql = "INSERT INTO user_info (username, password, role, status) VALUES (?, ?, ?, ?)";
+
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, user.getUsername());
+            pstmt.setString(2, user.getPassword());
+            pstmt.setString(3, user.getRole());
+            pstmt.setInt(4, user.getStatus());
+
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public UserInfo getUserById(int id) {
         String sql = "SELECT * FROM user_info WHERE id = ?";
 

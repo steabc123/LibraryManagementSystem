@@ -103,6 +103,44 @@ public class UserServlet extends BaseServlet {
             } else {
                 sendJsonResponse(resp, Result.error("注册失败"));
             }
+        } else if ("addUser".equals(action)) {
+            // 添加新用户（管理员操作）
+            if (!checkLogin(req, resp)) {
+                return;
+            }
+            
+            String username = params.get("username");
+            String password = params.get("password");
+            Object roleObj = params.get("role");
+            Object statusObj = params.get("status");
+            
+            if (username == null || username.trim().isEmpty() || 
+                password == null || password.trim().isEmpty()) {
+                sendJsonResponse(resp, Result.error("用户名和密码不能为空"));
+                return;
+            }
+            
+            UserInfo newUser = new UserInfo();
+            newUser.setUsername(username.trim());
+            newUser.setPassword(password);
+            newUser.setRole(roleObj != null ? roleObj.toString() : "user");
+            
+            // 处理 status 可能是 Double 或 Integer 的情况
+            if (statusObj != null) {
+                if (statusObj instanceof Number) {
+                    newUser.setStatus(((Number) statusObj).intValue());
+                } else {
+                    newUser.setStatus(Integer.parseInt(statusObj.toString()));
+                }
+            } else {
+                newUser.setStatus(1);
+            }
+
+            if (userDAO.addUser(newUser)) {
+                sendJsonResponse(resp, Result.success());
+            } else {
+                sendJsonResponse(resp, Result.error("添加用户失败"));
+            }
         }
     }
 
