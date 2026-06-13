@@ -6,17 +6,22 @@ public class UserInfo {
     private Integer id;
     private String username;
     private String password;
+    private String email;      // 邮箱
+    private String phone;      // 手机号
     private String role;
     private Integer status;
     private LocalDateTime createTime;
+    private Integer originalId;  // 原始ID，用于更新时追踪
 
     public UserInfo() {
     }
 
-    public UserInfo(Integer id, String username, String password, String role, Integer status, LocalDateTime createTime) {
+    public UserInfo(Integer id, String username, String password, String email, String phone, String role, Integer status, LocalDateTime createTime) {
         this.id = id;
         this.username = username;
         this.password = password;
+        this.email = email;
+        this.phone = phone;
         this.role = role;
         this.status = status;
         this.createTime = createTime;
@@ -46,6 +51,22 @@ public class UserInfo {
         this.password = password;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
     public String getRole() {
         return role;
     }
@@ -68,6 +89,14 @@ public class UserInfo {
 
     public void setCreateTime(LocalDateTime createTime) {
         this.createTime = createTime;
+    }
+
+    public Integer getOriginalId() {
+        return originalId;
+    }
+
+    public void setOriginalId(Integer originalId) {
+        this.originalId = originalId;
     }
 }
 
