@@ -56,7 +56,8 @@ public class CartDAO {
     // 获取用户购物车列表
     public List<CartItem> getCartByUserId(Integer userId) {
         List<CartItem> cartItems = new ArrayList<>();
-        String sql = "SELECT * FROM cart_item WHERE user_id = ? ORDER BY create_time DESC";
+        // 关联查询book_info表获取出版社和ISBN信息
+        String sql = "SELECT c.*, b.publisher, b.isbn FROM cart_item c LEFT JOIN book_info b ON c.book_id = b.id WHERE c.user_id = ? ORDER BY c.create_time DESC";
         
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -74,6 +75,9 @@ public class CartDAO {
                     item.setPrice(rs.getBigDecimal("price"));
                     item.setQuantity(rs.getInt("quantity"));
                     item.setCreateTime(DBUtil.convertToBeijingTime(rs.getTimestamp("create_time")));
+                    // 设置出版社和ISBN
+                    item.setPublisher(rs.getString("publisher"));
+                    item.setIsbn(rs.getString("isbn"));
                     cartItems.add(item);
                 }
             }

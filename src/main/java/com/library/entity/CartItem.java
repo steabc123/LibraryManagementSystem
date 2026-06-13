@@ -12,6 +12,8 @@ public class CartItem {
     private BigDecimal price;
     private Integer quantity;
     private LocalDateTime createTime;
+    private String publisher;  // 出版社
+    private String isbn;       // ISBN号
 
     public CartItem() {
     }
@@ -23,6 +25,17 @@ public class CartItem {
         this.author = author;
         this.price = price;
         this.quantity = quantity;
+    }
+
+    public CartItem(Integer userId, Integer bookId, String bookName, String author, BigDecimal price, Integer quantity, String publisher, String isbn) {
+        this.userId = userId;
+        this.bookId = bookId;
+        this.bookName = bookName;
+        this.author = author;
+        this.price = price;
+        this.quantity = quantity;
+        this.publisher = publisher;
+        this.isbn = isbn;
     }
 
     public Integer getId() {
@@ -87,6 +100,22 @@ public class CartItem {
 
     public void setCreateTime(LocalDateTime createTime) {
         this.createTime = createTime;
+    }
+
+    public String getPublisher() {
+        return publisher;
+    }
+
+    public void setPublisher(String publisher) {
+        this.publisher = publisher;
+    }
+
+    public String getIsbn() {
+        return isbn;
+    }
+
+    public void setIsbn(String isbn) {
+        this.isbn = isbn;
     }
 
     // 计算单项总价

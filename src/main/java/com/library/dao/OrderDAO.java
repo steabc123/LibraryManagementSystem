@@ -309,4 +309,115 @@ public class OrderDAO {
             }
         }
     }
+
+    // 支付订单并减少库存（事务操作）
+    public boolean payOrder(Long orderId) {
+        Connection conn = null;
+        PreparedStatement orderStmt = null;
+        PreparedStatement itemStmt = null;
+        ResultSet rs = null;
+        
+        try {
+            conn = DBUtil.getConnection();
+            conn.setAutoCommit(false);
+            
+            // 1. 检查订单状态
+            String checkSql = "SELECT order_status FROM orders WHERE id = ?";
+            orderStmt = conn.prepareStatement(checkSql);
+            orderStmt.setLong(1, orderId);
+            rs = orderStmt.executeQuery();
+            
+            if (!rs.next()) {
+                conn.rollback();
+                return false; // 订单不存在
+            }
+            
+            int status = rs.getInt("order_status");
+            if (status != 0) {
+                conn.rollback();
+                return false; // 订单状态不正确
+            }
+            rs.close();
+            orderStmt.close();
+            
+            // 2. 获取订单项列表
+            List<OrderItem> items = getOrderItems(orderId);
+            if (items == null || items.isEmpty()) {
+                conn.rollback();
+                return false;
+            }
+            
+            // 3. 批量减少库存
+            List<int[]> bookQuantities = new ArrayList<>();
+            for (OrderItem item : items) {
+                bookQuantities.add(new int[]{item.getBookId(), item.getQuantity()});
+            }
+            
+            String stockSql = "UPDATE book_info SET stock = stock - ? WHERE id = ? AND stock >= ?";
+            PreparedStatement stockStmt = conn.prepareStatement(stockSql);
+            
+            for (int[] bq : bookQuantities) {
+                int bookId = bq[0];
+                int quantity = bq[1];
+                stockStmt.setInt(1, quantity);
+                stockStmt.setInt(2, bookId);
+                stockStmt.setInt(3, quantity);
+                stockStmt.addBatch();
+            }
+            
+            int[] results = stockStmt.executeBatch();
+            // 检查是否所有库存都成功减少
+            for (int result : results) {
+                if (result <= 0) {
+                    conn.rollback();
+                    stockStmt.close();
+                    return false; // 库存不足
+                }
+            }
+            stockStmt.close();
+            
+            // 4. 更新订单状态为已支付
+            String updateSql = "UPDATE orders SET order_status = ?, pay_time = ? WHERE id = ?";
+            orderStmt = conn.prepareStatement(updateSql);
+            orderStmt.setInt(1, 1); // 状态改为已支付
+            orderStmt.setTimestamp(2, Timestamp.valueOf(java.time.LocalDateTime.now()));
+            orderStmt.setLong(3, orderId);
+            
+            int updateResult = orderStmt.executeUpdate();
+            if (updateResult <= 0) {
+                conn.rollback();
+                return false;
+            }
+            
+            conn.commit();
+            return true;
+            
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (rs != null) {
+                try { rs.close(); } catch (SQLException e) { e.printStackTrace(); }
+            }
+            if (itemStmt != null) {
+                try { itemStmt.close(); } catch (SQLException e) { e.printStackTrace(); }
+            }
+            if (orderStmt != null) {
+                try { orderStmt.close(); } catch (SQLException e) { e.printStackTrace(); }
+            }
+            if (conn != null) {
+                try { 
+                    conn.setAutoCommit(true);
+                    conn.close(); 
+                } catch (SQLException e) { e.printStackTrace(); }
+            }
+        }
+    }
 }

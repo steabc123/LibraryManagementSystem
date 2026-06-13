@@ -165,10 +165,11 @@ public class OrderServlet extends BaseServlet {
                 return;
             }
 
-            if (orderDAO.updateOrderStatus(orderId, 1, "pay_time")) {
-                sendJsonResponse(resp, Result.success("支付成功"));
+            // 使用新的 payOrder 方法，同时更新订单状态和减少库存
+            if (orderDAO.payOrder(orderId)) {
+                sendJsonResponse(resp, Result.success("支付成功，库存已扣减"));
             } else {
-                sendJsonResponse(resp, Result.error("支付失败"));
+                sendJsonResponse(resp, Result.error("支付失败，可能库存不足"));
             }
             return;
         }
