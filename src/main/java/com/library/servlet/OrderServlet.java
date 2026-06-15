@@ -266,14 +266,36 @@ public class OrderServlet extends BaseServlet {
         resp.setContentType("application/json;charset=UTF-8");
         resp.setCharacterEncoding("UTF-8");
 
-        if (!checkAdmin(req, resp)) {
+        if (!checkLogin(req, resp)) {
             return;
         }
 
+        UserInfo currentUser = getCurrentUser(req);
         String pathInfo = req.getPathInfo();
+        
         if (pathInfo != null && !pathInfo.equals("/")) {
             try {
                 Long orderId = Long.parseLong(pathInfo.substring(1));
+                
+                OrderInfo order = orderDAO.getOrderById(orderId);
+                if (order == null) {
+                    sendJsonResponse(resp, Result.error("订单不存在"));
+                    return;
+                }
+                
+                boolean isAdmin = "admin".equals(currentUser.getRole());
+                boolean isOwner = order.getUserId().equals(currentUser.getId());
+                
+                if (!isAdmin && !isOwner) {
+                    sendJsonResponse(resp, Result.error(403, "无权操作此订单"));
+                    return;
+                }
+                
+                if (!isAdmin && order.getOrderStatus() != 3) {
+                    sendJsonResponse(resp, Result.error(403, "只能删除已收货的订单"));
+                    return;
+                }
+                
                 if (orderDAO.deleteOrder(orderId)) {
                     sendJsonResponse(resp, Result.success("删除成功"));
                 } else {
