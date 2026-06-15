@@ -90,7 +90,7 @@ public class CartDAO {
 
     // 更新购物车商品数量
     public boolean updateCartItemQuantity(Integer cartItemId, Integer quantity) {
-        String sql = "UPDATE cart_item SET quantity = ? WHERE id = ?";
+        String sql = "UPDATE  cart_item SET quantity = ? WHERE id = ?";
         
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {

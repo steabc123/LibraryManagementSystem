@@ -160,52 +160,6 @@ public class BookDAO {
         return books;
     }
 
-    // 减少图书库存（用于订单支付）
-    public boolean reduceStock(int bookId, int quantity) {
-        String sql = "UPDATE book_info SET stock = stock - ? WHERE id = ? AND stock >= ?";
 
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setInt(1, quantity);
-            pstmt.setInt(2, bookId);
-            pstmt.setInt(3, quantity);  // 确保库存足够
-
-            return pstmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    // 批量减少图书库存（用于订单支付）
-    public boolean reduceStockBatch(List<int[]> bookQuantities) {
-        String sql = "UPDATE book_info SET stock = stock - ? WHERE id = ? AND stock >= ?";
-
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            for (int[] bq : bookQuantities) {
-                int bookId = bq[0];
-                int quantity = bq[1];
-                pstmt.setInt(1, quantity);
-                pstmt.setInt(2, bookId);
-                pstmt.setInt(3, quantity);
-                pstmt.addBatch();
-            }
-
-            int[] results = pstmt.executeBatch();
-            // 所有更新都必须成功
-            for (int result : results) {
-                if (result <= 0) {
-                    return false;
-                }
-            }
-            return true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
 }
 
