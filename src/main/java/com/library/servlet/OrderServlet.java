@@ -34,14 +34,12 @@ public class OrderServlet extends BaseServlet {
         UserInfo currentUser = getCurrentUser(req);
         String pathInfo = req.getPathInfo();
 
-        // 获取当前用户的订单列表
         if ("/my".equals(pathInfo)) {
             List<OrderInfo> orders = orderDAO.getOrdersByUserId(currentUser.getId());
             sendJsonResponse(resp, Result.success(orders));
             return;
         }
 
-        // 获取所有订单（管理员）
         if ("/all".equals(pathInfo)) {
             if (!"admin".equals(currentUser.getRole())) {
                 sendJsonResponse(resp, Result.error(403, "权限不足"));
@@ -52,13 +50,11 @@ public class OrderServlet extends BaseServlet {
             return;
         }
 
-        // 获取指定订单详情
         if (pathInfo != null && pathInfo.matches("/\\d+")) {
             try {
                 Long orderId = Long.parseLong(pathInfo.substring(1));
                 OrderInfo order = orderDAO.getOrderById(orderId);
                 if (order != null) {
-                    // 权限检查：普通用户只能查看自己的订单
                     if (!"admin".equals(currentUser.getRole()) && !order.getUserId().equals(currentUser.getId())) {
                         sendJsonResponse(resp, Result.error(403, "无权查看此订单"));
                         return;
@@ -90,7 +86,6 @@ public class OrderServlet extends BaseServlet {
         Map<String, Object> requestData = gson.fromJson(readRequestBody(req), Map.class);
         String action = (String) requestData.get("action");
 
-        // 创建订单（从购物车结算）
         if ("create".equals(action)) {
             List<Map<String, Object>> itemsData = (List<Map<String, Object>>) requestData.get("items");
             
@@ -99,7 +94,6 @@ public class OrderServlet extends BaseServlet {
                 return;
             }
 
-            // 计算总金额
             BigDecimal totalAmount = BigDecimal.ZERO;
             List<OrderItem> orderItems = new ArrayList<>();
             
@@ -145,7 +139,6 @@ public class OrderServlet extends BaseServlet {
             return;
         }
 
-        // 支付订单
         if ("pay".equals(action)) {
             Long orderId = ((Number) requestData.get("orderId")).longValue();
             
@@ -165,7 +158,6 @@ public class OrderServlet extends BaseServlet {
                 return;
             }
 
-            // 使用新的 payOrder 方法，同时更新订单状态和减少库存
             if (orderDAO.payOrder(orderId)) {
                 sendJsonResponse(resp, Result.success("支付成功，库存已扣减"));
             } else {
@@ -174,7 +166,6 @@ public class OrderServlet extends BaseServlet {
             return;
         }
 
-        // 发货（管理员）
         if ("ship".equals(action)) {
             if (!"admin".equals(currentUser.getRole())) {
                 sendJsonResponse(resp, Result.error(403, "权限不足"));
@@ -202,7 +193,6 @@ public class OrderServlet extends BaseServlet {
             return;
         }
 
-        // 确认收货
         if ("receive".equals(action)) {
             Long orderId = ((Number) requestData.get("orderId")).longValue();
             
@@ -230,7 +220,6 @@ public class OrderServlet extends BaseServlet {
             return;
         }
 
-        // 取消订单
         if ("cancel".equals(action)) {
             Long orderId = ((Number) requestData.get("orderId")).longValue();
             

@@ -79,7 +79,6 @@ public class OrderItem {
         this.quantity = quantity;
     }
 
-    // 计算单项总价
     public BigDecimal getTotalPrice() {
         if (price != null && quantity != null) {
             return price.multiply(new BigDecimal(quantity));

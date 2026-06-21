@@ -6,12 +6,12 @@ public class UserInfo {
     private Integer id;
     private String username;
     private String password;
-    private String email;      // 邮箱
-    private String phone;      // 手机号
+    private String email;
+    private String phone;
     private String role;
     private Integer status;
     private LocalDateTime createTime;
-    private Integer originalId;  // 原始ID，用于更新时追踪
+    private Integer originalId;
 
     public UserInfo() {
     }

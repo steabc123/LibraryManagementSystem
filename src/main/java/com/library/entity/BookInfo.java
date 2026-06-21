@@ -11,8 +11,8 @@ public class BookInfo {
     private String publisher;
     private BigDecimal price;
     private Integer stock;
-    private Integer categoryId;      // 分类ID
-    private String categoryName;     // 分类名称（用于显示）
+    private Integer categoryId;
+    private String categoryName;
     private LocalDateTime createTime;
 
     public BookInfo() {

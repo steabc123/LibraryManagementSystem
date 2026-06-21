@@ -8,15 +8,14 @@ public class OrderInfo {
     private Long id;
     private Integer userId;
     private BigDecimal totalAmount;
-    private Integer orderStatus; // 0:未支付 1:未发货(已支付) 2:已发货 3:已收货
+    private Integer orderStatus;
     private LocalDateTime createTime;
     private LocalDateTime payTime;
     private LocalDateTime shipTime;
     private LocalDateTime receiveTime;
     
-    // 非数据库字段，用于展示
-    private String username; // 用户名
-    private List<OrderItem> items; // 订单项列表
+    private String username;
+    private List<OrderItem> items;
 
     public OrderInfo() {
     }

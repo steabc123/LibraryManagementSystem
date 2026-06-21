@@ -9,9 +9,7 @@ import java.util.List;
 
 public class CartDAO {
 
-    // 添加商品到购物车
     public boolean addToCart(Integer userId, Integer bookId, String bookName, String author, Double price, Integer quantity) {
-        // 先检查是否已存在该商品
         String checkSql = "SELECT id, quantity FROM cart_item WHERE user_id = ? AND book_id = ?";
         
         try (Connection conn = DBUtil.getConnection();
@@ -22,7 +20,6 @@ public class CartDAO {
             
             try (ResultSet rs = checkStmt.executeQuery()) {
                 if (rs.next()) {
-                    // 已存在，更新数量
                     int existingId = rs.getInt("id");
                     int existingQuantity = rs.getInt("quantity");
                     int newQuantity = existingQuantity + quantity;
@@ -34,7 +31,6 @@ public class CartDAO {
                         return updateStmt.executeUpdate() > 0;
                     }
                 } else {
-                    // 不存在，插入新记录
                     String insertSql = "INSERT INTO cart_item (user_id, book_id, book_name, author, price, quantity) VALUES (?, ?, ?, ?, ?, ?)";
                     try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
                         insertStmt.setInt(1, userId);
@@ -53,10 +49,8 @@ public class CartDAO {
         }
     }
 
-    // 获取用户购物车列表
     public List<CartItem> getCartByUserId(Integer userId) {
         List<CartItem> cartItems = new ArrayList<>();
-        // 关联查询book_info表获取出版社和ISBN信息
         String sql = "SELECT c.*, b.publisher, b.isbn FROM cart_item c LEFT JOIN book_info b ON c.book_id = b.id WHERE c.user_id = ? ORDER BY c.create_time DESC";
         
         try (Connection conn = DBUtil.getConnection();
@@ -75,7 +69,6 @@ public class CartDAO {
                     item.setPrice(rs.getBigDecimal("price"));
                     item.setQuantity(rs.getInt("quantity"));
                     item.setCreateTime(DBUtil.convertToBeijingTime(rs.getTimestamp("create_time")));
-                    // 设置出版社和ISBN
                     item.setPublisher(rs.getString("publisher"));
                     item.setIsbn(rs.getString("isbn"));
                     cartItems.add(item);
@@ -88,7 +81,6 @@ public class CartDAO {
         return cartItems;
     }
 
-    // 更新购物车商品数量
     public boolean updateCartItemQuantity(Integer cartItemId, Integer quantity) {
         String sql = "UPDATE  cart_item SET quantity = ? WHERE id = ?";
         
@@ -105,7 +97,6 @@ public class CartDAO {
         }
     }
 
-    // 删除购物车商品
     public boolean deleteCartItem(Integer cartItemId) {
         String sql = "DELETE FROM cart_item WHERE id = ?";
         
@@ -121,7 +112,6 @@ public class CartDAO {
         }
     }
 
-    // 清空用户购物车
     public boolean clearCart(Integer userId) {
         String sql = "DELETE FROM cart_item WHERE user_id = ?";
         
@@ -138,7 +128,6 @@ public class CartDAO {
         }
     }
 
-    // 计算购物车总金额
     public double calculateTotalAmount(Integer userId) {
         String sql = "SELECT SUM(price * quantity) as total FROM cart_item WHERE user_id = ?";
         

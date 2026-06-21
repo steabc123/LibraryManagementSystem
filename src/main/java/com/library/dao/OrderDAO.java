@@ -10,7 +10,6 @@ import java.util.List;
 
 public class OrderDAO {
 
-    // 创建订单（事务操作）
     public boolean createOrder(OrderInfo order, List<OrderItem> items) {
         Connection conn = null;
         PreparedStatement orderStmt = null;
@@ -21,7 +20,6 @@ public class OrderDAO {
             conn = DBUtil.getConnection();
             conn.setAutoCommit(false);
             
-            // 1. 插入订单主表
             String orderSql = "INSERT INTO orders (user_id, total_amount, order_status, create_time) VALUES (?, ?, ?, ?)";
             orderStmt = conn.prepareStatement(orderSql, Statement.RETURN_GENERATED_KEYS);
             orderStmt.setInt(1, order.getUserId());
@@ -30,7 +28,6 @@ public class OrderDAO {
             orderStmt.setTimestamp(4, Timestamp.valueOf(order.getCreateTime()));
             orderStmt.executeUpdate();
             
-            // 获取生成的订单ID
             rs = orderStmt.getGeneratedKeys();
             Long orderId = null;
             if (rs.next()) {
@@ -42,7 +39,6 @@ public class OrderDAO {
                 return false;
             }
             
-            // 2. 插入订单项
             String itemSql = "INSERT INTO order_item (order_id, book_id, book_name, author, price, quantity) VALUES (?, ?, ?, ?, ?, ?)";
             itemStmt = conn.prepareStatement(itemSql);
             
@@ -90,7 +86,6 @@ public class OrderDAO {
         }
     }
 
-    // 获取用户订单列表
     public List<OrderInfo> getOrdersByUserId(Integer userId) {
         List<OrderInfo> orders = new ArrayList<>();
         String sql = "SELECT o.*, u.username FROM orders o LEFT JOIN user_info u ON o.user_id = u.id WHERE o.user_id = ? ORDER BY o.create_time DESC";
@@ -113,7 +108,6 @@ public class OrderDAO {
                     order.setShipTime(DBUtil.convertToBeijingTime(rs.getTimestamp("ship_time")));
                     order.setReceiveTime(DBUtil.convertToBeijingTime(rs.getTimestamp("receive_time")));
                     
-                    // 加载订单项
                     order.setItems(getOrderItems(order.getId()));
                     
                     orders.add(order);
@@ -126,7 +120,6 @@ public class OrderDAO {
         return orders;
     }
 
-    // 获取所有订单（管理员）
     public List<OrderInfo> getAllOrders() {
         List<OrderInfo> orders = new ArrayList<>();
         String sql = "SELECT o.*, u.username FROM orders o LEFT JOIN user_info u ON o.user_id = u.id ORDER BY o.create_time DESC";
@@ -147,7 +140,6 @@ public class OrderDAO {
                     order.setShipTime(DBUtil.convertToBeijingTime(rs.getTimestamp("ship_time")));
                     order.setReceiveTime(DBUtil.convertToBeijingTime(rs.getTimestamp("receive_time")));
                     
-                    // 加载订单项
                     order.setItems(getOrderItems(order.getId()));
                     
                     orders.add(order);
@@ -160,7 +152,6 @@ public class OrderDAO {
         return orders;
     }
 
-    // 获取订单详情
     public OrderInfo getOrderById(Long orderId) {
         String sql = "SELECT o.*, u.username FROM orders o LEFT JOIN user_info u ON o.user_id = u.id WHERE o.id = ?";
         
@@ -182,7 +173,6 @@ public class OrderDAO {
                     order.setShipTime(DBUtil.convertToBeijingTime(rs.getTimestamp("ship_time")));
                     order.setReceiveTime(DBUtil.convertToBeijingTime(rs.getTimestamp("receive_time")));
                     
-                    // 加载订单项
                     order.setItems(getOrderItems(order.getId()));
                     
                     return order;
@@ -195,7 +185,6 @@ public class OrderDAO {
         return null;
     }
 
-    // 获取订单项列表
     private List<OrderItem> getOrderItems(Long orderId) {
         List<OrderItem> items = new ArrayList<>();
         String sql = "SELECT * FROM order_item WHERE order_id = ?";
@@ -225,7 +214,6 @@ public class OrderDAO {
         return items;
     }
 
-    // 更新订单状态
     public boolean updateOrderStatus(Long orderId, Integer status, String timeField) {
         String sql = "UPDATE orders SET order_status = ?";
         List<Object> params = new ArrayList<>();
@@ -259,7 +247,6 @@ public class OrderDAO {
         }
     }
 
-    // 删除订单
     public boolean deleteOrder(Long orderId) {
         Connection conn = null;
         PreparedStatement itemStmt = null;
@@ -269,13 +256,11 @@ public class OrderDAO {
             conn = DBUtil.getConnection();
             conn.setAutoCommit(false);
             
-            // 先删除订单项
             String itemSql = "DELETE FROM order_item WHERE order_id = ?";
             itemStmt = conn.prepareStatement(itemSql);
             itemStmt.setLong(1, orderId);
             itemStmt.executeUpdate();
             
-            // 再删除订单
             String orderSql = "DELETE FROM orders WHERE id = ?";
             orderStmt = conn.prepareStatement(orderSql);
             orderStmt.setLong(1, orderId);
@@ -310,7 +295,6 @@ public class OrderDAO {
         }
     }
 
-    // 支付订单并减少库存（事务操作）
     public boolean payOrder(Long orderId) {
         Connection conn = null;
         PreparedStatement orderStmt = null;
@@ -321,7 +305,6 @@ public class OrderDAO {
             conn = DBUtil.getConnection();
             conn.setAutoCommit(false);
             
-            // 1. 检查订单状态
             String checkSql = "SELECT order_status FROM orders WHERE id = ?";
             orderStmt = conn.prepareStatement(checkSql);
             orderStmt.setLong(1, orderId);
@@ -329,25 +312,23 @@ public class OrderDAO {
             
             if (!rs.next()) {
                 conn.rollback();
-                return false; // 订单不存在
+                return false;
             }
             
             int status = rs.getInt("order_status");
             if (status != 0) {
                 conn.rollback();
-                return false; // 订单状态不正确
+                return false;
             }
             rs.close();
             orderStmt.close();
             
-            // 2. 获取订单项列表
             List<OrderItem> items = getOrderItems(orderId);
             if (items == null || items.isEmpty()) {
                 conn.rollback();
                 return false;
             }
             
-            // 3. 批量减少库存
             List<int[]> bookQuantities = new ArrayList<>();
             for (OrderItem item : items) {
                 bookQuantities.add(new int[]{item.getBookId(), item.getQuantity()});
@@ -366,20 +347,18 @@ public class OrderDAO {
             }
             
             int[] results = stockStmt.executeBatch();
-            // 检查是否所有库存都成功减少
             for (int result : results) {
                 if (result <= 0) {
                     conn.rollback();
                     stockStmt.close();
-                    return false; // 库存不足
+                    return false;
                 }
             }
             stockStmt.close();
             
-            // 4. 更新订单状态为已支付
             String updateSql = "UPDATE orders SET order_status = ?, pay_time = ? WHERE id = ?";
             orderStmt = conn.prepareStatement(updateSql);
-            orderStmt.setInt(1, 1); // 状态改为已支付
+            orderStmt.setInt(1, 1);
             orderStmt.setTimestamp(2, Timestamp.valueOf(java.time.LocalDateTime.now()));
             orderStmt.setLong(3, orderId);
             

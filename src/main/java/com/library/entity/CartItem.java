@@ -12,8 +12,8 @@ public class CartItem {
     private BigDecimal price;
     private Integer quantity;
     private LocalDateTime createTime;
-    private String publisher;  // 出版社
-    private String isbn;       // ISBN号
+    private String publisher;
+    private String isbn;
 
     public CartItem() {
     }
@@ -118,7 +118,6 @@ public class CartItem {
         this.isbn = isbn;
     }
 
-    // 计算单项总价
     public BigDecimal getTotalPrice() {
         if (price != null && quantity != null) {
             return price.multiply(new BigDecimal(quantity));

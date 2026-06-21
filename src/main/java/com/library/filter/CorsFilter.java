@@ -19,10 +19,8 @@ public class CorsFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) resp;
         HttpServletRequest request = (HttpServletRequest) req;
 
-        // 获取请求来源
         String origin = request.getHeader("Origin");
         
-        // 当使用withCredentials时，不能使用"*"，必须指定具体域名
         if (origin != null && (origin.contains("localhost") || origin.contains("127.0.0.1"))) {
             response.setHeader("Access-Control-Allow-Origin", origin);
         } else {
@@ -34,7 +32,6 @@ public class CorsFilter implements Filter {
         response.setHeader("Access-Control-Max-Age", "3600");
         response.setHeader("Access-Control-Allow-Credentials", "true");
 
-        // 处理预检请求
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             response.setStatus(HttpServletResponse.SC_OK);
             return;

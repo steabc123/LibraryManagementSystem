@@ -11,15 +11,9 @@ import jakarta.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-/**
- * Servlet基类，提供公共方法
- */
 public abstract class BaseServlet extends jakarta.servlet.http.HttpServlet {
     protected Gson gson = GsonConfig.getGson();
 
-    /**
-     * 读取请求体内容
-     */
     protected String readRequestBody(HttpServletRequest req) throws IOException {
         BufferedReader reader = req.getReader();
         StringBuilder sb = new StringBuilder();
@@ -30,9 +24,6 @@ public abstract class BaseServlet extends jakarta.servlet.http.HttpServlet {
         return sb.toString();
     }
 
-    /**
-     * 检查用户是否登录
-     */
     protected boolean checkLogin(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         HttpSession session = req.getSession(false);
         if (session == null || session.getAttribute("currentUser") == null) {
@@ -44,9 +35,6 @@ public abstract class BaseServlet extends jakarta.servlet.http.HttpServlet {
         return true;
     }
 
-    /**
-     * 检查是否为管理员
-     */
     protected boolean checkAdmin(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         HttpSession session = req.getSession(false);
         if (session == null || session.getAttribute("currentUser") == null) {
@@ -66,9 +54,6 @@ public abstract class BaseServlet extends jakarta.servlet.http.HttpServlet {
         return true;
     }
 
-    /**
-     * 获取当前登录用户
-     */
     protected UserInfo getCurrentUser(HttpServletRequest req) {
         HttpSession session = req.getSession(false);
         if (session != null) {
@@ -77,9 +62,6 @@ public abstract class BaseServlet extends jakarta.servlet.http.HttpServlet {
         return null;
     }
 
-    /**
-     * 发送JSON响应
-     */
     protected void sendJsonResponse(HttpServletResponse resp, Object data) throws IOException {
         resp.setContentType("application/json;charset=UTF-8");
         resp.setCharacterEncoding("UTF-8");
