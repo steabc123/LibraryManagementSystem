@@ -45,6 +45,10 @@ public class CategoryServlet extends BaseServlet {
         resp.setContentType("application/json;charset=UTF-8");
         resp.setCharacterEncoding("UTF-8");
 
+        if (!checkAdmin(req, resp)) {
+            return;
+        }
+
         BookCategory category = gson.fromJson(readRequestBody(req), BookCategory.class);
 
         if (categoryDAO.addCategory(category)) {
@@ -59,6 +63,10 @@ public class CategoryServlet extends BaseServlet {
         resp.setContentType("application/json;charset=UTF-8");
         resp.setCharacterEncoding("UTF-8");
 
+        if (!checkAdmin(req, resp)) {
+            return;
+        }
+
         BookCategory category = gson.fromJson(readRequestBody(req), BookCategory.class);
 
         if (categoryDAO.updateCategory(category)) {
@@ -72,6 +80,10 @@ public class CategoryServlet extends BaseServlet {
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json;charset=UTF-8");
         resp.setCharacterEncoding("UTF-8");
+
+        if (!checkAdmin(req, resp)) {
+            return;
+        }
 
         String pathInfo = req.getPathInfo();
         if (pathInfo != null && !pathInfo.equals("/")) {

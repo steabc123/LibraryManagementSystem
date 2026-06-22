@@ -18,15 +18,6 @@ public class CartItem {
     public CartItem() {
     }
 
-    public CartItem(Integer userId, Integer bookId, String bookName, String author, BigDecimal price, Integer quantity) {
-        this.userId = userId;
-        this.bookId = bookId;
-        this.bookName = bookName;
-        this.author = author;
-        this.price = price;
-        this.quantity = quantity;
-    }
-
     public CartItem(Integer userId, Integer bookId, String bookName, String author, BigDecimal price, Integer quantity, String publisher, String isbn) {
         this.userId = userId;
         this.bookId = bookId;

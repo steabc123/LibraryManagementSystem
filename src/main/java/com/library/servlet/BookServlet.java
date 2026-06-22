@@ -51,6 +51,10 @@ public class BookServlet extends BaseServlet {
         resp.setContentType("application/json;charset=UTF-8");
         resp.setCharacterEncoding("UTF-8");
 
+        if (!checkAdmin(req, resp)) {
+            return;
+        }
+
         BookInfo book = gson.fromJson(readRequestBody(req), BookInfo.class);
 
         if (bookDAO.addBook(book)) {
@@ -65,6 +69,10 @@ public class BookServlet extends BaseServlet {
         resp.setContentType("application/json;charset=UTF-8");
         resp.setCharacterEncoding("UTF-8");
 
+        if (!checkAdmin(req, resp)) {
+            return;
+        }
+
         BookInfo book = gson.fromJson(readRequestBody(req), BookInfo.class);
 
         if (bookDAO.updateBook(book)) {
@@ -78,6 +86,10 @@ public class BookServlet extends BaseServlet {
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json;charset=UTF-8");
         resp.setCharacterEncoding("UTF-8");
+
+        if (!checkAdmin(req, resp)) {
+            return;
+        }
 
         String pathInfo = req.getPathInfo();
         if (pathInfo != null && !pathInfo.equals("/")) {

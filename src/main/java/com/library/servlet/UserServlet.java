@@ -30,6 +30,9 @@ public class UserServlet extends BaseServlet {
         String pathInfo = req.getPathInfo();
         
         if ("/all".equals(pathInfo)) {
+            if (!checkAdmin(req, resp)) {
+                return;
+            }
             List<UserInfo> users = userDAO.getAllUsers();
             users.forEach(user -> user.setPassword(null));
             sendJsonResponse(resp, Result.success(users));
@@ -101,7 +104,7 @@ public class UserServlet extends BaseServlet {
                 sendJsonResponse(resp, Result.error("注册失败"));
             }
         } else if ("addUser".equals(action)) {
-            if (!checkLogin(req, resp)) {
+            if (!checkAdmin(req, resp)) {
                 return;
             }
             
@@ -287,7 +290,7 @@ public class UserServlet extends BaseServlet {
         resp.setContentType("application/json;charset=UTF-8");
         resp.setCharacterEncoding("UTF-8");
 
-        if (!checkLogin(req, resp)) {
+        if (!checkAdmin(req, resp)) {
             return;
         }
 
