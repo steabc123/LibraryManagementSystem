@@ -7,11 +7,11 @@ import com.library.util.GsonConfig;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-
+import jakarta.servlet.http.HttpServlet;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-public abstract class BaseServlet extends jakarta.servlet.http.HttpServlet {
+public abstract class BaseServlet extends HttpServlet {
     protected Gson gson = GsonConfig.getGson();
 
     protected String readRequestBody(HttpServletRequest req) throws IOException {
