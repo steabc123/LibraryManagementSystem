@@ -18,20 +18,6 @@ public class BookInfo {
     public BookInfo() {
     }
 
-    public BookInfo(Integer id, String bookName, String author, String isbn, String publisher,
-                    BigDecimal price, Integer stock, Integer categoryId, String categoryName, LocalDateTime createTime) {
-        this.id = id;
-        this.bookName = bookName;
-        this.author = author;
-        this.isbn = isbn;
-        this.publisher = publisher;
-        this.price = price;
-        this.stock = stock;
-        this.categoryId = categoryId;
-        this.categoryName = categoryName;
-        this.createTime = createTime;
-    }
-
     public Integer getId() {
         return id;
     }

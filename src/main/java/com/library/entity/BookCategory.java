@@ -8,12 +8,6 @@ public class BookCategory {
     public BookCategory() {
     }
 
-    public BookCategory(Integer categoryId, String categoryName, String categoryDesc) {
-        this.categoryId = categoryId;
-        this.categoryName = categoryName;
-        this.categoryDesc = categoryDesc;
-    }
-
     public Integer getCategoryId() {
         return categoryId;
     }

@@ -13,16 +13,6 @@ public class BorrowRecord {
     public BorrowRecord() {
     }
 
-    public BorrowRecord(Long recordId, Integer userId, Integer bookId, LocalDateTime borrowTime,
-                       LocalDateTime returnTime, Integer borrowStatus) {
-        this.recordId = recordId;
-        this.userId = userId;
-        this.bookId = bookId;
-        this.borrowTime = borrowTime;
-        this.returnTime = returnTime;
-        this.borrowStatus = borrowStatus;
-    }
-
     public Long getRecordId() {
         return recordId;
     }

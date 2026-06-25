@@ -14,15 +14,6 @@ public class OrderItem {
     public OrderItem() {
     }
 
-    public OrderItem(Long orderId, Integer bookId, String bookName, String author, BigDecimal price, Integer quantity) {
-        this.orderId = orderId;
-        this.bookId = bookId;
-        this.bookName = bookName;
-        this.author = author;
-        this.price = price;
-        this.quantity = quantity;
-    }
-
     public Long getId() {
         return id;
     }
@@ -77,12 +68,5 @@ public class OrderItem {
 
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
-    }
-
-    public BigDecimal getTotalPrice() {
-        if (price != null && quantity != null) {
-            return price.multiply(new BigDecimal(quantity));
-        }
-        return BigDecimal.ZERO;
     }
 }

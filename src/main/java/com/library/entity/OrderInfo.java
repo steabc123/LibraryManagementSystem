@@ -20,12 +20,6 @@ public class OrderInfo {
     public OrderInfo() {
     }
 
-    public OrderInfo(Integer userId, BigDecimal totalAmount, Integer orderStatus) {
-        this.userId = userId;
-        this.totalAmount = totalAmount;
-        this.orderStatus = orderStatus;
-    }
-
     public Long getId() {
         return id;
     }

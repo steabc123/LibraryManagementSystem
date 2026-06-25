@@ -18,17 +18,6 @@ public class CartItem {
     public CartItem() {
     }
 
-    public CartItem(Integer userId, Integer bookId, String bookName, String author, BigDecimal price, Integer quantity, String publisher, String isbn) {
-        this.userId = userId;
-        this.bookId = bookId;
-        this.bookName = bookName;
-        this.author = author;
-        this.price = price;
-        this.quantity = quantity;
-        this.publisher = publisher;
-        this.isbn = isbn;
-    }
-
     public Integer getId() {
         return id;
     }
@@ -107,12 +96,5 @@ public class CartItem {
 
     public void setIsbn(String isbn) {
         this.isbn = isbn;
-    }
-
-    public BigDecimal getTotalPrice() {
-        if (price != null && quantity != null) {
-            return price.multiply(new BigDecimal(quantity));
-        }
-        return BigDecimal.ZERO;
     }
 }

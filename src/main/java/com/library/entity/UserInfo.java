@@ -16,17 +16,6 @@ public class UserInfo {
     public UserInfo() {
     }
 
-    public UserInfo(Integer id, String username, String password, String email, String phone, String role, Integer status, LocalDateTime createTime) {
-        this.id = id;
-        this.username = username;
-        this.password = password;
-        this.email = email;
-        this.phone = phone;
-        this.role = role;
-        this.status = status;
-        this.createTime = createTime;
-    }
-
     public Integer getId() {
         return id;
     }
